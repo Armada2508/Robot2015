@@ -233,9 +233,6 @@ public class Robot extends SampleRobot {
         }
     }
     
-    private String liftStatus;
-    private String clampStatus;
-    private String armDirection;
     private double dashTime;
 
     public void updateDashboard() {
@@ -257,28 +254,21 @@ public class Robot extends SampleRobot {
         dashboard.put("Rotation Factor", chassis.rotationFactor);
         
         // Lift
+        String liftStatus = "Stationary";
         if (lift.getSpeed() < 0)
             liftStatus = "Lowering";
         else if (lift.getSpeed() > 0)
             liftStatus = "Raising";
-        else
-        	liftStatus = "Stationary";
         dashboard.put("Lift Status", liftStatus);
         
         dashboard.put("At Home?", lift.isAtHome());
 
         // Clamp
-        if (lift.isClamped())
-            clampStatus = "Clamped";
-        else
-        	clampStatus = "Free";
-        dashboard.put("Clamp Status", clampStatus);
+        dashboard.put("Clamp Status", lift.isClamped() ? "Clamped" : "Free");
         
         // Arms
-        armDirection = arms.isPulling() ? "Pulling" : "Pushing";
-        boolean armEnabled = arms.isEnabled();
-        dashboard.put("Arm Direction", armDirection);
-        dashboard.put("Arm Enabled", armEnabled);
+        dashboard.put("Arm Direction", arms.isPulling() ? "Pulling" : "Pushing");
+        dashboard.put("Arm Enabled", arms.isEnabled());
 
         // Camera
         dashboard.put("Camera Enabled?", Variables.VISION);
