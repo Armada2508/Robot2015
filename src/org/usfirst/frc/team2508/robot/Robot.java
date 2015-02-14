@@ -30,6 +30,7 @@ public class Robot extends SampleRobot {
 
     @Override
     public void robotInit() {
+    	System.out.println("Robot Modular Running!");
         resetRobot();
     }
     
@@ -37,11 +38,12 @@ public class Robot extends SampleRobot {
         chassis.setInvertedMotor(MotorType.kFrontRight, true);
         chassis.setInvertedMotor(MotorType.kRearLeft, true);
         chassis.setInvertedMotor(MotorType.kRearRight, false);
-        chassis.setExpiration(0.1);
         
         lift.toggleClamp(false);
         
         tasks = new ArrayList<Task>();
+
+        dashboard.put("Latest Task", "N/A");
     }
 
     @Override
@@ -172,7 +174,8 @@ public class Robot extends SampleRobot {
                 chassis.speedFactor -= 0.1;
             if (gamepad.getFirstPressRT())
                 chassis.speedFactor += 0.1;
-            chassis.speedFactor = Math.max(Variables.MIN_SPEED_FACTOR, Math.max(1, chassis.speedFactor));
+            if (gamepad.getFirstPressLT() || gamepad.getFirstPressRT())
+            	chassis.speedFactor = Math.max(Variables.MIN_SPEED_FACTOR, Math.min(1, chassis.speedFactor));
 
             
             //=================
@@ -182,7 +185,8 @@ public class Robot extends SampleRobot {
                 chassis.rotationFactor -= 0.1;
             if (gamepad.getFirstPressRightStickPress())
                 chassis.rotationFactor += 0.1;
-            chassis.rotationFactor = Math.max(Variables.MIN_ROTATION_FACTOR, Math.max(1, chassis.rotationFactor));
+            if (gamepad.getFirstPressLeftStickPress() || gamepad.getFirstPressRightStickPress())
+            	chassis.rotationFactor = Math.max(Variables.MIN_ROTATION_FACTOR, Math.min(1, chassis.rotationFactor));
             
             
             //======
@@ -192,7 +196,7 @@ public class Robot extends SampleRobot {
                 lift.set(-Variables.LIFT_SPEED);
             else if (gamepad.getButtonRB())
                 lift.set(Variables.LIFT_SPEED);
-            else
+            else if (lift.get() != 0)
                 lift.set(0);
 
 
@@ -224,6 +228,10 @@ public class Robot extends SampleRobot {
         }
         
     }
+    
+    String liftStatus;
+    String clampStatus;
+    String armDirection;
 
     public void updateDashboard() {
         // Gamepad
@@ -236,21 +244,23 @@ public class Robot extends SampleRobot {
         dashboard.put("Rotation Factor", chassis.rotationFactor);
         
         // Lift
-        String liftStatus = "Stationary";
         if (lift.get() < 0)
             liftStatus = "Lowering";
         else if (lift.get() > 0)
             liftStatus = "Raising";
+        else
+        	liftStatus = "Stationary";
         dashboard.put("Lift Status", liftStatus);
 
         // Clamp
-        String clampStatus = "Free";
         if (lift.isClamped())
             clampStatus = "Clamped";
+        else
+        	clampStatus = "Free";
         dashboard.put("Clamp Status", clampStatus);
         
         // Arms
-        String armDirection = arms.isPulling() ? "Pulling" : "Pushing";
+        armDirection = arms.isPulling() ? "Pulling" : "Pushing";
         boolean armEnabled = arms.isEnabled();
         dashboard.put("Arm Direction", armDirection);
         dashboard.put("Arm Enabled", armEnabled);
@@ -258,15 +268,14 @@ public class Robot extends SampleRobot {
         // Camera
         dashboard.put("Camera Enabled?", Variables.VISION);
         
-        // Task
-        if (!isAutonomous())
-            dashboard.put("Latest Task", "N/A");
-        
-        int concurrent = 0;
-        for (Task task : tasks)
-            if (task.isRunning())
-                concurrent += 1;
-        dashboard.put("Concurrent Tasks", concurrent);
+        // Autonomous
+        if (isAutonomous()) {
+            int concurrent = 0;
+            for (Task task : tasks)
+                if (task.isRunning())
+                    concurrent += 1;
+            dashboard.put("Concurrent Tasks", concurrent);	
+        }
     }
 
 }
