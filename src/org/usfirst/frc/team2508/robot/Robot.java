@@ -27,16 +27,16 @@ public class Robot extends SampleRobot {
 
     @Override
     public void robotInit() {
-    	resetRobot();
+        resetRobot();
     }
     
     public void resetRobot() {
-    	lift.toggleClamp(false);
+        lift.toggleClamp(false);
     }
 
     @Override
     public void autonomous() {
-    	// Disable safety.
+        // Disable safety.
         chassis.setSafetyEnabled(false);
 
         // Reset robot state.
@@ -49,12 +49,12 @@ public class Robot extends SampleRobot {
 
         tasks.add(new Task("Revert Home") {
 
-			@Override
-			protected void run() {
-				lift.goHome();
-				lift.toggleClamp();
-			}
-        	
+            @Override
+            protected void run() {
+                lift.goHome();
+                lift.toggleClamp();
+            }
+            
         });
 
 
@@ -62,11 +62,11 @@ public class Robot extends SampleRobot {
         // Autonomous Loop
         //=================
         while (isAutonomous() && isEnabled()) {
-        	//=======
-        	// Tasks
-        	//=======
+            //=======
+            // Tasks
+            //=======
             for (final Task task : tasks) {
-            	SmartDashboard.putString("Current Task", task.getName());
+                SmartDashboard.putString("Current Task", task.getName());
                 task.runTask();
             }
             
@@ -131,9 +131,9 @@ public class Robot extends SampleRobot {
                 lift.set(0);
 
 
-        	//============
+            //============
             // Lift Clamp
-        	//============
+            //============
             if (gamepad.getFirstPressY())
                 lift.toggleClamp();
 
@@ -161,7 +161,7 @@ public class Robot extends SampleRobot {
     }
 
     public void updateDashboard() {
-    	// Gamepad
+        // Gamepad
         dashboard.put("L-Stick X (strafe)", gamepad.getLeftStickX());
         dashboard.put("L-Stick Y (linear)", gamepad.getLeftStickY());
         dashboard.put("R-Stick X (rotation)", gamepad.getRightStickX());
@@ -173,15 +173,15 @@ public class Robot extends SampleRobot {
         // Lift
         String liftStatus = "Stationary";
         if (lift.get() < 0)
-        	liftStatus = "Lowering";
+            liftStatus = "Lowering";
         else if (lift.get() > 0)
-        	liftStatus = "Raising";
+            liftStatus = "Raising";
         dashboard.put("Lift Status", liftStatus);
 
         // Clamp
         String clampStatus = "Free";
         if (lift.isClamped())
-        	clampStatus = "Clamped";
+            clampStatus = "Clamped";
         dashboard.put("Clamp Status", clampStatus);
         
         // Arms
