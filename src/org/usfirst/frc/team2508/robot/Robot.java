@@ -49,17 +49,12 @@ public class Robot extends SampleRobot {
     @Override
     public void autonomous() {
     	System.out.println("Autonomous started.");
-    	
-        // Disable safety.
         chassis.setSafetyEnabled(false);
-
-        // Reset robot state.
         resetRobot();
 
         //========================
         // Make the List of Tasks
         //========================
-        
         tasks.add(new Task("Move Forward to Box") {
 
             @Override
@@ -123,7 +118,7 @@ public class Robot extends SampleRobot {
                     vision.tick();
                     
                     updateDashboard();
-                    Timer.delay(0.05);
+                    Timer.delay(Variables.LOOP_DELAY);
                 }
             }
             
@@ -146,11 +141,7 @@ public class Robot extends SampleRobot {
 
     public void operatorControl() {
     	System.out.println("Operator control started");
-    	
-        // Enable safety.
         chassis.setSafetyEnabled(true);
-        
-        // Reset robot state.
         resetRobot();
 
         //=======================
@@ -223,7 +214,7 @@ public class Robot extends SampleRobot {
 
             updateDashboard();
             gamepad.updatePrevButtonStates();
-            Timer.delay(0.05);
+            Timer.delay(Variables.LOOP_DELAY);
         }
         
     }

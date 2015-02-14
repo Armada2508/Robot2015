@@ -24,6 +24,7 @@ public class Vision {
     public void setupCamera() {
     	try {
     		this.camera = CameraServer.getInstance();
+    		this.camera.setQuality(75);
     		this.image = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
     		this.session = NIVision.IMAQdxOpenCamera(Variables.CAMERA, IMAQdxCameraControlMode.CameraControlModeListener);
     		
@@ -35,6 +36,9 @@ public class Vision {
     	}
     }
 
+    private double currentTime = 0;
+    private double lastCapture = 0;
+    
     /**
      * Called every time we go through the autonomous
      * or tele-op loop (each "tick").
@@ -42,17 +46,21 @@ public class Vision {
     public void tick() {
     	if (!Variables.VISION)
     		return;
+    	
+    	currentTime += Variables.LOOP_DELAY;
+    	
+    	if (currentTime - lastCapture < 0.07)
+    		return;
 
+    	lastCapture = currentTime;
+    	
     	// Load new camera data into "image" variable.
 		NIVision.IMAQdxGrab(session, image, 1);
 		
 		if (Variables.VISION_ADVANCED) {
-			// Use this for particle calculations
-			// Image binary = NIVision.imaqCreateImage(ImageType.IMAGE_U8, 100);
-			
 			NIVision.imaqColorThreshold(image, image, 255, ColorMode.RGB, Variables.VISION_RED, Variables.VISION_GREEN, Variables.VISION_BLUE);
 		}
-
+		
 		camera.setImage(image);
     }
 

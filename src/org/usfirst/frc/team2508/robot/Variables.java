@@ -7,6 +7,12 @@ import com.ni.vision.NIVision.Range;
  */
 public class Variables {
 	
+	/**
+	 * The Timer.delay() number to use in 
+	 * autonomous and tele-op loops.
+	 */
+	public static double LOOP_DELAY = 0.01;
+	
     /**
      * Controls the speed the speed that
      * the arm motors should go at.
