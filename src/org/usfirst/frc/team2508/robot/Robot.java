@@ -30,7 +30,7 @@ public class Robot extends SampleRobot {
 
     @Override
     public void robotInit() {
-    	System.out.println("Robot Modular Running!");
+    	System.out.println("Robot Modular Initialized!");
         resetRobot();
     }
     
@@ -48,7 +48,7 @@ public class Robot extends SampleRobot {
 
     @Override
     public void autonomous() {
-    	System.out.println("Autonomous started.");
+    	System.out.println("Autonomous started!");
         chassis.setSafetyEnabled(false);
         resetRobot();
 
@@ -76,11 +76,11 @@ public class Robot extends SampleRobot {
             	
             	waitFor(0.6);
             	
-                lift.set(0.9);
+                lift.setSpeed(0.9);
                 
                 waitFor(2.2);
                 
-                lift.set(0);
+                lift.setSpeed(0);
             }
         });
         
@@ -140,7 +140,7 @@ public class Robot extends SampleRobot {
     }
 
     public void operatorControl() {
-    	System.out.println("Operator control started");
+    	System.out.println("Operator control started!");
         chassis.setSafetyEnabled(true);
         resetRobot();
 
@@ -183,11 +183,11 @@ public class Robot extends SampleRobot {
             // Lift
             //======
             if (gamepad.getButtonLB())
-                lift.set(-Variables.LIFT_SPEED);
+                lift.setSpeed(-Variables.LIFT_SPEED);
             else if (gamepad.getButtonRB())
-                lift.set(Variables.LIFT_SPEED);
-            else if (lift.get() != 0)
-                lift.set(0);
+                lift.setSpeed(Variables.LIFT_SPEED);
+            else if (lift.getSpeed() != 0)
+                lift.setSpeed(0);
 
 
             //============
@@ -197,7 +197,7 @@ public class Robot extends SampleRobot {
                 lift.toggleClamp();
 
             
-            //======
+            /*======
             // Arms
             //======
             if (gamepad.getFirstPressA())
@@ -205,6 +205,21 @@ public class Robot extends SampleRobot {
 
             if (gamepad.getFirstPressX())
                 arms.toggle();
+            */
+            
+            //==============
+            // Clamp & Lift
+            //==============
+            if (gamepad.getFirstPress(13))
+            	lift.taskClampLift();
+            else if (gamepad.getFirstPress(14))
+            	lift.taskDownReleaseHome();
+            
+            //===============
+            // #yoloDrift420
+            //===============
+            if (gamepad.getFirstPressStart())
+            	chassis.toggleYoloDrift420();
             
             
             //========
@@ -216,17 +231,25 @@ public class Robot extends SampleRobot {
             gamepad.updatePrevButtonStates();
             Timer.delay(Variables.LOOP_DELAY);
         }
-        
     }
     
     private String liftStatus;
     private String clampStatus;
     private String armDirection;
+    private double dashTime;
 
     public void updateDashboard() {
+    	dashTime += Variables.LOOP_DELAY;
+    	
+    	if (dashTime % 0.2 != 0)
+    		return;
+    	
+    	// Diagnostics
+    	dashboard.put("Diagnostics", chassis.isYoloDrift420ing);
+    	
         // Gamepad
+        dashboard.put("L-Stick Y (linear)", -gamepad.getLeftStickY());
         dashboard.put("L-Stick X (strafe)", gamepad.getLeftStickX());
-        dashboard.put("L-Stick Y (linear)", gamepad.getLeftStickY());
         dashboard.put("R-Stick X (rotation)", gamepad.getRightStickX());
 
         // Speed
@@ -234,13 +257,15 @@ public class Robot extends SampleRobot {
         dashboard.put("Rotation Factor", chassis.rotationFactor);
         
         // Lift
-        if (lift.get() < 0)
+        if (lift.getSpeed() < 0)
             liftStatus = "Lowering";
-        else if (lift.get() > 0)
+        else if (lift.getSpeed() > 0)
             liftStatus = "Raising";
         else
         	liftStatus = "Stationary";
         dashboard.put("Lift Status", liftStatus);
+        
+        dashboard.put("At Home?", lift.isAtHome());
 
         // Clamp
         if (lift.isClamped())

@@ -44,10 +44,10 @@ public class Vision {
      * or tele-op loop (each "tick").
      */
     public void tick() {
+    	currentTime += Variables.LOOP_DELAY;
+    	
     	if (!Variables.VISION)
     		return;
-    	
-    	currentTime += Variables.LOOP_DELAY;
     	
     	if (currentTime - lastCapture < 0.07)
     		return;
@@ -57,9 +57,8 @@ public class Vision {
     	// Load new camera data into "image" variable.
 		NIVision.IMAQdxGrab(session, image, 1);
 		
-		if (Variables.VISION_ADVANCED) {
+		if (Variables.VISION_ADVANCED)
 			NIVision.imaqColorThreshold(image, image, 255, ColorMode.RGB, Variables.VISION_RED, Variables.VISION_GREEN, Variables.VISION_BLUE);
-		}
 		
 		camera.setImage(image);
     }

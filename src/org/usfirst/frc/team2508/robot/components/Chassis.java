@@ -1,9 +1,12 @@
 package org.usfirst.frc.team2508.robot.components;
 
-import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.RobotDrive.MotorType;
-
 import org.usfirst.frc.team2508.robot.Robot;
+import org.usfirst.frc.team2508.robot.Variables;
+import org.usfirst.frc.team2508.robot.autonomous.AsyncTask;
+
+import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 
 public class Chassis {
 
@@ -12,6 +15,8 @@ public class Chassis {
 
     public double speedFactor = 0.5;
     public double rotationFactor = 0.5;
+    
+    public boolean isYoloDrift420ing;
 
     public Chassis(Robot robot) {
         this.robot = robot;
@@ -58,6 +63,41 @@ public class Chassis {
      */
     public void stop() {
         mecanumDrive(0, 0, 0);
+    }
+    
+    public void toggleYoloDrift420() {
+    	isYoloDrift420ing = !isYoloDrift420ing;
+    	
+    	if (!isYoloDrift420ing)
+    		return;
+    	
+    	new AsyncTask("Yolo Drift 420") {
+
+			@Override
+			protected void run() {
+				mecanumDrive(0.5, 0.5, 0.3);
+
+				robot.lift.goHome();
+				
+				robot.lift.setSpeed(Variables.LIFT_SPEED);
+				
+				double time = 0;
+				
+				while (isYoloDrift420ing) {
+					if (time % 0.3 == 0)
+						robot.lift.toggleClamp();
+					
+					if (time % 3 == 0)
+						robot.lift.setSpeed(-robot.lift.getSpeed());
+					
+					time += Variables.LOOP_DELAY;
+					Timer.delay(Variables.LOOP_DELAY);
+				}
+				
+				isYoloDrift420ing = false;
+			}
+    		
+    	}.runTask();
     }
     
 }

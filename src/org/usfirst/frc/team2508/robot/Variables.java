@@ -8,6 +8,12 @@ import com.ni.vision.NIVision.Range;
 public class Variables {
 	
 	/**
+	 * The number of rotations needed to reach
+	 * a height capable of grabbing another box.
+	 */
+	public static double BOX_HEIGHT_ROTATIONS = 4.0;
+
+	/**
 	 * The Timer.delay() number to use in 
 	 * autonomous and tele-op loops.
 	 */

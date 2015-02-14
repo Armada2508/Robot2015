@@ -30,7 +30,7 @@ public abstract class Task {
      * Initiate and run the task!
      */
     public void runTask() {
-    	System.out.println("Starting Task: " + name);
+    	System.out.println("Starting Task: \"" + name + "\"");
     	
         // Set running
         this.running = true;
@@ -38,7 +38,7 @@ public abstract class Task {
         // Run the task (implemented in child classes).
         run();
 
-        System.out.println("Finished Task: " + name);
+        System.out.println("Finished Task: \"" + name + "\"");
         this.running = false;
     }
 
