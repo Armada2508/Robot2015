@@ -42,7 +42,7 @@ public class Variables {
     /**
      * Receive camera input and log to the dashboard?
      */
-    public static boolean VISION = false;
+    public static boolean VISION = true;
 
     /**
      * Set if we should interpret camera input and

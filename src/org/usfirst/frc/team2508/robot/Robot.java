@@ -48,6 +48,8 @@ public class Robot extends SampleRobot {
 
     @Override
     public void autonomous() {
+    	System.out.println("Autonomous started.");
+    	
         // Disable safety.
         chassis.setSafetyEnabled(false);
 
@@ -57,51 +59,52 @@ public class Robot extends SampleRobot {
         //========================
         // Make the List of Tasks
         //========================
+        
         tasks.add(new Task("Home, Forward, Clamp") {
 
             @Override
             protected void run() {
-                // Go to home position
-                lift.goHome();
-                
-                // Drive forward at 0.3 speed
-                chassis.mecanumDrive(0.3, 0, 0);
+                // Drive forward
+                chassis.mecanumDrive(-0.5, 0, 0);
                 
                 // Wait 1 second, then stop movement.
-                waitUntil(1);
+                waitUntil(0.95);
                 chassis.stop();
-                
-                // Clamp
-                lift.toggleClamp(true);
             }
             
         });
         
-        tasks.add(new AsyncTask("Lift") {
+        tasks.add(new Task("Lift") {
             
             @Override
             protected void run() {
+            	lift.toggleClamp(true);
+            	
+            	waitUntil(0.6);
+            	
                 // Lift at a speed of 0.5.
                 lift.set(0.9);
                 
                 // Wait until it reaches a good height, then stop.
-                waitUntil(1);
+                waitUntil(2.8);
                 lift.set(0);
             }
         });
         
-        tasks.add(new AsyncTask("Move Back, Move Right") {
+        
+        tasks.add(new Task("Rotate, Move Forward") {
             
             @Override
             protected void run() {
-                // Strafe right
-                chassis.mecanumDrive(0, 0.5, 0);
-                
-                // Wait until far enough right.
-                waitUntil(1);
-                
-                // Stop
-                chassis.stop();
+            	chassis.mecanumDrive(0, 0, 0.5);
+            	
+            	waitUntil(1);
+            	
+            	chassis.mecanumDrive(-0.8, 0, 0);
+            	
+            	waitUntil(3);
+            	
+            	chassis.stop();
             }
         });
 
@@ -142,6 +145,8 @@ public class Robot extends SampleRobot {
     }
 
     public void operatorControl() {
+    	System.out.println("Operator control started");
+    	
         // Enable safety.
         chassis.setSafetyEnabled(true);
         
@@ -223,9 +228,9 @@ public class Robot extends SampleRobot {
         
     }
     
-    String liftStatus;
-    String clampStatus;
-    String armDirection;
+    private String liftStatus;
+    private String clampStatus;
+    private String armDirection;
 
     public void updateDashboard() {
         // Gamepad
@@ -258,9 +263,10 @@ public class Robot extends SampleRobot {
         boolean armEnabled = arms.isEnabled();
         dashboard.put("Arm Direction", armDirection);
         dashboard.put("Arm Enabled", armEnabled);
-        
+
         // Camera
         dashboard.put("Camera Enabled?", Variables.VISION);
+        dashboard.put("Advanced Vision?", Variables.VISION_ADVANCED);
         
         // Autonomous
         if (isAutonomous()) {
