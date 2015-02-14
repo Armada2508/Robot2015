@@ -36,7 +36,8 @@ public class Vision {
     }
 
     /**
-     * Called every tick.
+     * Called every time we go through the autonomous
+     * or tele-op loop (each "tick").
      */
     public void tick() {
     	if (!Variables.VISION)

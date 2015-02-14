@@ -12,7 +12,7 @@ public abstract class Task {
 
 	private final String name;
     private Date startTime;
-    private boolean completed = false;
+    private boolean running = false;
     
     /**
      * Instantiate a task.
@@ -38,12 +38,15 @@ public abstract class Task {
     	
         // Record the start time.
         this.startTime = new Date();
+        
+        // Set running
+        this.running = true;
 
         // Run the task (implemented in child classes).
         run();
 
         System.out.println("Finished Task: " + name);
-        this.completed = true;
+        this.running = false;
     }
 
     /**
@@ -65,6 +68,14 @@ public abstract class Task {
     public boolean hasBeen(double seconds) {
         return getTime() >= seconds;
     }
+    
+    /**
+     * Is this task running right now?
+     * @return If the task is running;
+     */
+    public boolean isRunning() {
+        return running;
+    }
 
     /**
      * Get the amount of time this task has been running.
@@ -72,14 +83,6 @@ public abstract class Task {
      */
     public double getTime() {
         return ((double) (new Date().getTime() - startTime.getTime())) / 1000.0;
-    }
-
-    /**
-     * Check if task is completed.
-     * @return If the task is over.
-     */
-    public boolean isCompleted() {
-        return completed;
     }
 
     /**

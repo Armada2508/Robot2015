@@ -3,6 +3,7 @@ package org.usfirst.frc.team2508.robot;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.usfirst.frc.team2508.robot.autonomous.AsyncTask;
 import org.usfirst.frc.team2508.robot.autonomous.Task;
 import org.usfirst.frc.team2508.robot.components.Arms;
 import org.usfirst.frc.team2508.robot.components.Chassis;
@@ -14,7 +15,6 @@ import org.usfirst.frc.team2508.robot.lib.LogitechGamepad;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot {
 
@@ -25,6 +25,8 @@ public class Robot extends SampleRobot {
     public Lift lift = new Lift(this);
     public Vision vision = new Vision(this);
     public Dashboard dashboard = new Dashboard();
+    
+    public List<Task> tasks = new ArrayList<Task>();
 
     @Override
     public void robotInit() {
@@ -36,7 +38,10 @@ public class Robot extends SampleRobot {
         chassis.setInvertedMotor(MotorType.kRearLeft, true);
         chassis.setInvertedMotor(MotorType.kRearRight, false);
         chassis.setExpiration(0.1);
+        
         lift.toggleClamp(false);
+        
+        tasks = new ArrayList<Task>();
     }
 
     @Override
@@ -50,39 +55,94 @@ public class Robot extends SampleRobot {
         //========================
         // Make the List of Tasks
         //========================
-        final List<Task> tasks = new ArrayList<Task>();
-
-        tasks.add(new Task("Revert Home") {
+        tasks.add(new Task("Home, Forward, Clamp") {
 
             @Override
             protected void run() {
+                // Go to home position
                 lift.goHome();
-                lift.toggleClamp();
+                
+                // Drive forward at 0.3 speed
+                chassis.mecanumDrive(0.3, 0, 0);
+                
+                // Wait 1 second, then stop movement.
+                waitUntil(1);
+                chassis.stop();
+                
+                // Clampp
+                lift.toggleClamp(true);
             }
             
         });
+        
+        tasks.add(new AsyncTask("Lift") {
+            
+            @Override
+            protected void run() {
+                // Lift at a speed of 0.5.
+                lift.set(0.5);
+                
+                // Wait until it reaches a good height, then stop.
+                waitUntil(0.5);
+                lift.set(0);
+            }
+        });
+        
+        tasks.add(new AsyncTask("Move Back, Move Right") {
+            
+            @Override
+            protected void run() {
+                // Move backwards.
+                chassis.mecanumDrive(-0.3, 0, 0);
+                
+                // Wait until far enough back.
+                waitUntil(1);
+                
+                // Strafe right
+                chassis.mecanumDrive(0, 0.5, 0);
+                
+                // Wait until far enough right.
+                waitUntil(1);
+                
+                // Stop
+                chassis.stop();
+            }
+        });
 
-
-        //=================
-        // Autonomous Loop
-        //=================
-        while (isAutonomous() && isEnabled()) {
-            //=======
-            // Tasks
-            //=======
-            for (final Task task : tasks) {
-                SmartDashboard.putString("Current Task", task.getName());
-                task.runTask();
+        
+        //=============
+        // Async Stuff
+        //=============
+        new Thread() {
+            
+            @Override
+            public void run() {
+                while (isAutonomous() && isEnabled()) {
+                    //========
+                    // Vision
+                    //========
+                    vision.tick();
+                    
+                    updateDashboard();
+                    Timer.delay(0.05);
+                }
             }
             
-            //========
-            // Vision
-            //========
-            vision.tick();
+        }.start();
+        
+
+        //=================
+        // Tasks
+        //=================
+        for (final Task task : tasks) {
+            // Break if not autonomous anymore.
+            if (!isAutonomous() || !isEnabled())
+                break;
             
-            updateDashboard();
-            Timer.delay(0.05);
+            dashboard.put("Latest Task", task.getName() + " (#" + (tasks.indexOf(task) + 1) + ")");
+            task.runTask();
         }
+        
     }
 
     public void operatorControl() {
@@ -197,6 +257,16 @@ public class Robot extends SampleRobot {
         
         // Camera
         dashboard.put("Camera Enabled?", Variables.VISION);
+        
+        // Task
+        if (!isAutonomous())
+            dashboard.put("Latest Task", "N/A");
+        
+        int concurrent = 0;
+        for (Task task : tasks)
+            if (task.isRunning())
+                concurrent += 1;
+        dashboard.put("Concurrent Tasks", concurrent);
     }
 
 }
