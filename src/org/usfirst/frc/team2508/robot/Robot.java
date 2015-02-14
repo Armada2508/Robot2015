@@ -71,7 +71,7 @@ public class Robot extends SampleRobot {
                 waitUntil(1);
                 chassis.stop();
                 
-                // Clampp
+                // Clamp
                 lift.toggleClamp(true);
             }
             
@@ -82,10 +82,10 @@ public class Robot extends SampleRobot {
             @Override
             protected void run() {
                 // Lift at a speed of 0.5.
-                lift.set(0.5);
+                lift.set(0.9);
                 
                 // Wait until it reaches a good height, then stop.
-                waitUntil(0.5);
+                waitUntil(1);
                 lift.set(0);
             }
         });
@@ -94,12 +94,6 @@ public class Robot extends SampleRobot {
             
             @Override
             protected void run() {
-                // Move backwards.
-                chassis.mecanumDrive(-0.3, 0, 0);
-                
-                // Wait until far enough back.
-                waitUntil(1);
-                
                 // Strafe right
                 chassis.mecanumDrive(0, 0.5, 0);
                 
@@ -161,10 +155,10 @@ public class Robot extends SampleRobot {
             //===============
             // Mecanum Drive
             //===============
-            double xMovement = gamepad.getLeftStickX() * chassis.speedFactor;
-            double yMovement = gamepad.getLeftStickY() * chassis.speedFactor;
+            double strafe = gamepad.getLeftStickX() * chassis.speedFactor * 1.7;
+            double linear = gamepad.getLeftStickY() * chassis.speedFactor;
             double rotation = gamepad.getRightStickX() * chassis.rotationFactor;
-            chassis.mecanumDrive(xMovement, yMovement, rotation);
+            chassis.mecanumDrive(linear, strafe, rotation);
             
 
             //==============
