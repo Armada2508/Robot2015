@@ -130,6 +130,15 @@ public class Robot extends SampleRobot {
             else
                 lift.set(0);
 
+
+        	//============
+            // Lift Clamp
+        	//============
+            if (gamepad.getFirstPressY())
+                lift.toggleClamp();
+
+            
+            //======
             // Arms
             //======
             if (gamepad.getFirstPressA())
