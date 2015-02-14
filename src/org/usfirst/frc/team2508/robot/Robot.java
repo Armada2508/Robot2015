@@ -11,6 +11,7 @@ import org.usfirst.frc.team2508.robot.components.Lift;
 import org.usfirst.frc.team2508.robot.components.Vision;
 import org.usfirst.frc.team2508.robot.lib.LogitechGamepad;
 
+import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,6 +32,10 @@ public class Robot extends SampleRobot {
     }
     
     public void resetRobot() {
+        chassis.setInvertedMotor(MotorType.kFrontRight, true);
+        chassis.setInvertedMotor(MotorType.kRearLeft, true);
+        chassis.setInvertedMotor(MotorType.kRearRight, false);
+        chassis.setExpiration(0.1);
         lift.toggleClamp(false);
     }
 

@@ -1,6 +1,8 @@
 package org.usfirst.frc.team2508.robot.components;
 
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.RobotDrive.MotorType;
+
 import org.usfirst.frc.team2508.robot.Robot;
 
 public class Chassis {
@@ -14,6 +16,23 @@ public class Chassis {
     public Chassis(Robot robot) {
         this.robot = robot;
         this.drive = new RobotDrive(0, 1, 2, 3);
+    }
+
+    /**
+     * Invert a motor.
+     * @param motorType
+     * @param inverted
+     */
+	public void setInvertedMotor(MotorType motorType, boolean inverted) {
+		drive.setInvertedMotor(motorType, inverted);
+	}
+    
+    /**
+     * Set the expiration/timeout of wheels...
+     * @param timeout The timeout.
+     */
+    public void setExpiration(double timeout) {
+    	drive.setExpiration(timeout);
     }
 
     /**
@@ -40,4 +59,5 @@ public class Chassis {
     public void stop() {
         mecanumDrive(0, 0, 0);
     }
+    
 }
