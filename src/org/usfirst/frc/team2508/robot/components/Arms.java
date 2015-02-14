@@ -1,22 +1,35 @@
 package org.usfirst.frc.team2508.robot.components;
 
-import edu.wpi.first.wpilibj.Talon;
 import org.usfirst.frc.team2508.robot.Robot;
 import org.usfirst.frc.team2508.robot.Variables;
 
-public class Arms {
+import edu.wpi.first.wpilibj.Talon;
 
-    private Robot robot;
-    private Talon leftArm;
-    private Talon rightArm;
+public class Arms {
+	
+    private Talon talon;
 
     private boolean enabled = false;
-    private boolean intake = true;
+    private boolean pulling = true;
 
     public Arms(Robot robot) {
-        this.robot = robot;
-        this.leftArm = new Talon(5);
-        this.rightArm = new Talon(6);
+        this.talon = new Talon(5);
+    }
+    
+    /**
+     * Check if the arms are running.
+     * @return If arm motors are running.
+     */
+    public boolean isEnabled() {
+    	return enabled;
+    }
+    
+    /**
+     * Check if arms are set to intaking (regardless if enabled).
+     * @return True if intaking, false if not intaking.
+     */
+    public boolean isPulling() {
+    	return pulling;
     }
 
     /**
@@ -24,18 +37,7 @@ public class Arms {
      * @param speed The speed [-1.0, 1.0]. Positive is intake.
      */
     public void set(double speed) {
-        leftArm.set(speed);
-        rightArm.set(-speed);
-    }
-
-    /**
-     * Reverse the direction on the arms.
-     * This will not activate the arms.
-     */
-    public void reverse() {
-        intake = !intake;
-        if (enabled)
-            run();
+        talon.set(speed);
     }
 
     /**
@@ -47,13 +49,24 @@ public class Arms {
     }
 
     /**
+     * Reverse the direction on the arms.
+     * This will not activate the arms.
+     */
+    public void reverse() {
+        pulling = !pulling;
+        if (enabled)
+            run();
+    }
+    
+    /**
      * Activate the motors at a speed determined in variables
      * in the direction that is saved.
      */
-    public void run() {
+    private void run() {
         double speed = Variables.ARM_SPEED;
 
-        if (!intake)
+        // If not intaking, reverse the speed.
+        if (!pulling)
             speed = -speed;
 
         set(speed);

@@ -1,17 +1,19 @@
 package org.usfirst.frc.team2508.robot;
 
-import edu.wpi.first.wpilibj.SampleRobot;
-import edu.wpi.first.wpilibj.Timer;
-import org.usfirst.frc.team2508.robot.autonomous.AsyncTask;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.usfirst.frc.team2508.robot.autonomous.Task;
 import org.usfirst.frc.team2508.robot.components.Arms;
 import org.usfirst.frc.team2508.robot.components.Chassis;
+import org.usfirst.frc.team2508.robot.components.Dashboard;
 import org.usfirst.frc.team2508.robot.components.Lift;
 import org.usfirst.frc.team2508.robot.components.Vision;
 import org.usfirst.frc.team2508.robot.lib.LogitechGamepad;
 
-import java.util.ArrayList;
-import java.util.List;
+import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot {
 
@@ -21,93 +23,106 @@ public class Robot extends SampleRobot {
     public Arms arms = new Arms(this);
     public Lift lift = new Lift(this);
     public Vision vision = new Vision(this);
+    public Dashboard dashboard = new Dashboard();
 
     @Override
     public void robotInit() {
-
+    	resetRobot();
+    }
+    
+    public void resetRobot() {
+    	lift.toggleClamp(false);
     }
 
     @Override
     public void autonomous() {
+    	// Disable safety.
         chassis.setSafetyEnabled(false);
 
+        // Reset robot state.
+        resetRobot();
+
+        //========================
+        // Make the List of Tasks
+        //========================
         final List<Task> tasks = new ArrayList<Task>();
 
-        tasks.add(new Task() {
-            @Override
-            protected void run() {
-                chassis.mecanumDrive(5, 0, 0);
+        tasks.add(new Task("Revert Home") {
 
-                waitUntil(0.5);
-                chassis.stop();
-            }
-        });
-
-        tasks.add(new Task() {
-            @Override
-            protected void run() {
-                lift.toggleClamp(true);
-            }
-        });
-
-        tasks.add(new AsyncTask() {
-            @Override
-            protected void run() {
-                lift.set(0.5);
-
-                waitUntil(1);
-                lift.set(0);
-            }
-        });
-
-        tasks.add(new AsyncTask() {
-            @Override
-            protected void run() {
-                chassis.mecanumDrive(-5, 0, 0);
-                waitUntil(3);
-                chassis.mecanumDrive(0, 5, 0);
-            }
+			@Override
+			protected void run() {
+				lift.goHome();
+				lift.toggleClamp();
+			}
+        	
         });
 
 
+        //=================
+        // Autonomous Loop
+        //=================
         while (isAutonomous() && isEnabled()) {
+        	//=======
+        	// Tasks
+        	//=======
             for (final Task task : tasks) {
+            	SmartDashboard.putString("Current Task", task.getName());
                 task.runTask();
-                Timer.delay(0.10);
             }
+            
+            //========
+            // Vision
+            //========
+            vision.tick();
+            
+            updateDashboard();
+            Timer.delay(0.05);
         }
     }
 
     public void operatorControl() {
+        // Enable safety.
         chassis.setSafetyEnabled(true);
+        
+        // Reset robot state.
+        resetRobot();
 
+        //=======================
+        // Operator Control Loop
+        //=======================
         while (isOperatorControl() && isEnabled()) {
-
-            // Lift clamp
-            if (gamepad.getFirstPressY())
-                lift.toggleClamp();
-
+            //===============
             // Mecanum Drive
+            //===============
             double xMovement = gamepad.getLeftStickX() * chassis.speedFactor;
             double yMovement = gamepad.getLeftStickY() * chassis.speedFactor;
-            double rotation = gamepad.getRightStickX() * chassis.speedFactor;
+            double rotation = gamepad.getRightStickX() * chassis.rotationFactor;
             chassis.mecanumDrive(xMovement, yMovement, rotation);
+            
 
+            //==============
             // Speed Factor
+            //==============
             if (gamepad.getFirstPressLT())
                 chassis.speedFactor -= 0.1;
             if (gamepad.getFirstPressRT())
                 chassis.speedFactor += 0.1;
             chassis.speedFactor = Math.max(Variables.MIN_SPEED_FACTOR, Math.max(1, chassis.speedFactor));
 
+            
+            //=================
             // Rotation Factor
+            //=================
             if (gamepad.getFirstPressLeftStickPress())
                 chassis.rotationFactor -= 0.1;
             if (gamepad.getFirstPressRightStickPress())
                 chassis.rotationFactor += 0.1;
             chassis.rotationFactor = Math.max(Variables.MIN_ROTATION_FACTOR, Math.max(1, chassis.rotationFactor));
-
+            
+            
+            //======
             // Lift
+            //======
             if (gamepad.getButtonLB())
                 lift.set(-Variables.LIFT_SPEED);
             else if (gamepad.getButtonRB())
@@ -116,16 +131,58 @@ public class Robot extends SampleRobot {
                 lift.set(0);
 
             // Arms
+            //======
             if (gamepad.getFirstPressA())
                 arms.reverse();
 
             if (gamepad.getFirstPressX())
                 arms.toggle();
+            
+            
+            //========
+            // Vision
+            //========
+            vision.tick();
 
-
-
-            Timer.delay(0.10);
+            updateDashboard();
+            gamepad.updatePrevButtonStates();
+            Timer.delay(0.05);
         }
+        
+    }
+
+    public void updateDashboard() {
+    	// Gamepad
+        dashboard.put("L-Stick X (strafe)", gamepad.getLeftStickX());
+        dashboard.put("L-Stick Y (linear)", gamepad.getLeftStickY());
+        dashboard.put("R-Stick X (rotation)", gamepad.getRightStickX());
+
+        // Speed
+        dashboard.put("Speed Factor", chassis.speedFactor);
+        dashboard.put("Rotation Factor", chassis.rotationFactor);
+        
+        // Lift
+        String liftStatus = "Stationary";
+        if (lift.get() < 0)
+        	liftStatus = "Lowering";
+        else if (lift.get() > 0)
+        	liftStatus = "Raising";
+        dashboard.put("Lift Status", liftStatus);
+
+        // Clamp
+        String clampStatus = "Free";
+        if (lift.isClamped())
+        	clampStatus = "Clamped";
+        dashboard.put("Clamp Status", clampStatus);
+        
+        // Arms
+        String armDirection = arms.isPulling() ? "Pulling" : "Pushing";
+        boolean armEnabled = arms.isEnabled();
+        dashboard.put("Arm Direction", armDirection);
+        dashboard.put("Arm Enabled", armEnabled);
+        
+        // Camera
+        dashboard.put("Camera Enabled?", Variables.VISION);
     }
 
 }
