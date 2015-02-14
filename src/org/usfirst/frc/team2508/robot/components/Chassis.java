@@ -50,7 +50,7 @@ public class Chassis {
      * @param rotation Rotate left or right.
      */
     public void mecanumDrive(double linear, double strafe, double rotation) {
-        drive.mecanumDrive_Cartesian(strafe, linear, rotation, 0);
+        drive.mecanumDrive_Cartesian(strafe, -linear, rotation, 0);
     }
 
     /**

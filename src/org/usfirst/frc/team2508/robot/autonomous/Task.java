@@ -9,15 +9,11 @@ import edu.wpi.first.wpilibj.Timer;
  * can do. It can be executed with runTask().
  */
 public abstract class Task {
-
-	private final String name;
-    private Date startTime;
+	
+	private String name;
+    private Date stopWaiting;
     private boolean running = false;
     
-    /**
-     * Instantiate a task.
-     * @param name The name of the task.
-     */
     public Task(String name) {
     	this.name = name;
     }
@@ -36,9 +32,6 @@ public abstract class Task {
     public void runTask() {
     	System.out.println("Starting Task: " + name);
     	
-        // Record the start time.
-        this.startTime = new Date();
-        
         // Set running
         this.running = true;
 
@@ -53,20 +46,13 @@ public abstract class Task {
      * Locks the thread until an amount of seconds has passed by.
      * @param seconds The amount of time.
      */
-    public void waitUntil(double seconds) {
-        while (!hasBeen(seconds)) {
-            // Locks thread! Warning!
-        	Timer.delay(0.05);
-        }
-    }
-
-    /**
-     * Check if the task has been running for a certain amount of time.
-     * @param seconds The duration.
-     * @return If it's been running for that much time yo.
-     */
-    public boolean hasBeen(double seconds) {
-        return getTime() >= seconds;
+    public void waitFor(double seconds) {
+    	this.stopWaiting = new Date(new Date().getTime() + (int) (seconds * 1000.0));
+    	
+    	while (!new Date().after(stopWaiting)) {
+    		// Locks thread!
+    		Timer.delay(0.05);
+    	}
     }
     
     /**
@@ -75,14 +61,6 @@ public abstract class Task {
      */
     public boolean isRunning() {
         return running;
-    }
-
-    /**
-     * Get the amount of time this task has been running.
-     * @return The time in seconds.
-     */
-    public double getTime() {
-        return ((double) (new Date().getTime() - startTime.getTime())) / 1000.0;
     }
 
     /**

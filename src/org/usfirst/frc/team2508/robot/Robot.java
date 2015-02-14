@@ -60,49 +60,49 @@ public class Robot extends SampleRobot {
         // Make the List of Tasks
         //========================
         
-        tasks.add(new Task("Home, Forward, Clamp") {
+        tasks.add(new Task("Move Forward to Box") {
 
             @Override
             protected void run() {
-                // Drive forward
-                chassis.mecanumDrive(-0.5, 0, 0);
+                chassis.mecanumDrive(0.5, 0, 0);
                 
-                // Wait 1 second, then stop movement.
-                waitUntil(0.95);
+                waitFor(0.95);
+                
                 chassis.stop();
             }
             
         });
         
-        tasks.add(new Task("Lift") {
+        tasks.add(new AsyncTask("Clamp and Lift Box") {
             
             @Override
             protected void run() {
             	lift.toggleClamp(true);
             	
-            	waitUntil(0.6);
+            	waitFor(0.6);
             	
-                // Lift at a speed of 0.5.
                 lift.set(0.9);
                 
-                // Wait until it reaches a good height, then stop.
-                waitUntil(2.8);
+                waitFor(2.2);
+                
                 lift.set(0);
             }
         });
         
         
-        tasks.add(new Task("Rotate, Move Forward") {
+        tasks.add(new Task("Rotate Robot and Move Forward") {
             
             @Override
             protected void run() {
+            	waitFor(0.5);
+            	
             	chassis.mecanumDrive(0, 0, 0.5);
             	
-            	waitUntil(1);
+            	waitFor(1.0);
             	
-            	chassis.mecanumDrive(-0.8, 0, 0);
+            	chassis.mecanumDrive(0.6, 0, 0);
             	
-            	waitUntil(3);
+            	waitFor(4.0);
             	
             	chassis.stop();
             }
@@ -160,8 +160,8 @@ public class Robot extends SampleRobot {
             //===============
             // Mecanum Drive
             //===============
-            double strafe = gamepad.getLeftStickX() * chassis.speedFactor * 1.7;
-            double linear = gamepad.getLeftStickY() * chassis.speedFactor;
+            double strafe = gamepad.getLeftStickX() * chassis.speedFactor * 1.5;
+            double linear = -gamepad.getLeftStickY() * chassis.speedFactor;
             double rotation = gamepad.getRightStickX() * chassis.rotationFactor;
             chassis.mecanumDrive(linear, strafe, rotation);
             
