@@ -75,8 +75,6 @@ public class Chassis {
 
 			@Override
 			protected void run() {
-				mecanumDrive(0.5, 0.5, 0.3);
-
 				robot.lift.goHome();
 				
 				robot.lift.setSpeed(Variables.LIFT_SPEED);
@@ -89,12 +87,12 @@ public class Chassis {
 					
 					if (time % 3 == 0)
 						robot.lift.setSpeed(-robot.lift.getSpeed());
+
+					mecanumDrive(0.5, 0.5, 0.3);
 					
 					time += Variables.LOOP_DELAY;
 					Timer.delay(Variables.LOOP_DELAY);
 				}
-				
-				isYoloDrift420ing = false;
 			}
     		
     	}.runTask();
