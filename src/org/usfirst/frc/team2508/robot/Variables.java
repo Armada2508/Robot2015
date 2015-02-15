@@ -43,7 +43,7 @@ public class Variables {
     /**
      * Control the speed of the lift.
      */
-    public static double LIFT_SPEED = 0.9;
+    public static double LIFT_SPEED = 1;
     
     /**
      * Either cam0 or cam1 depending on what USB

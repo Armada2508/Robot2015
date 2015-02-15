@@ -2,6 +2,8 @@ package org.usfirst.frc.team2508.robot.autonomous;
 
 import java.util.Date;
 
+import org.usfirst.frc.team2508.robot.Robot;
+
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -29,14 +31,14 @@ public abstract class Task {
     /**
      * Initiate and run the task!
      */
-    public void runTask() {
+    public void runTask(Robot robot) {
     	System.out.println("Starting Task: \"" + name + "\"");
     	
         // Set running
         this.running = true;
 
         // Run the task (implemented in child classes).
-        run();
+        run(robot);
 
         System.out.println("Finished Task: \"" + name + "\"");
         this.running = false;
@@ -66,6 +68,6 @@ public abstract class Task {
     /**
      * Run the task (implemented in child classes).
      */
-    protected abstract void run();
+    protected abstract void run(Robot robot);
 
 }

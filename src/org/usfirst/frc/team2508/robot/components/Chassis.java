@@ -74,7 +74,7 @@ public class Chassis {
     	new AsyncTask("Yolo Drift 420") {
 
 			@Override
-			protected void run() {
+			protected void run(Robot robot) {
 				robot.lift.goHome();
 				
 				robot.lift.setSpeed(Variables.LIFT_SPEED);
@@ -95,7 +95,7 @@ public class Chassis {
 				}
 			}
     		
-    	}.runTask();
+    	}.runTask(robot);
     }
     
 }

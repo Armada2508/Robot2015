@@ -1,5 +1,7 @@
 package org.usfirst.frc.team2508.robot.autonomous;
 
+import org.usfirst.frc.team2508.robot.Robot;
+
 /**
  * A asynchronous task represents an activity that 
  * the robot can do at the same time other things
@@ -19,11 +21,11 @@ public abstract class AsyncTask extends Task {
      * Run the task asynchronously.
      */
     @Override
-    public void runTask() {
+    public void runTask(Robot robot) {
         new Thread() {
             @Override
             public void run() {
-                AsyncTask.super.runTask();
+                AsyncTask.super.runTask(robot);
             }
         }.start();
     }

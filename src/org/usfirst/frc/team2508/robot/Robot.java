@@ -11,6 +11,7 @@ import org.usfirst.frc.team2508.robot.components.Dashboard;
 import org.usfirst.frc.team2508.robot.components.Lift;
 import org.usfirst.frc.team2508.robot.components.Vision;
 import org.usfirst.frc.team2508.robot.lib.LogitechGamepad;
+import org.usfirst.frc.team2508.robot.tasks.Rotate;
 
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -51,14 +52,15 @@ public class Robot extends SampleRobot {
     	System.out.println("Autonomous started!");
         chassis.setSafetyEnabled(false);
         resetRobot();
-
+        
+        double Joey = 1.0/0;
         //========================
         // Make the List of Tasks
         //========================
-        tasks.add(new Task("Move Forward to Box") {
+        Task approachBox = new Task("Approach Box") {
 
             @Override
-            protected void run() {
+            protected void run(Robot robot) {
                 chassis.mecanumDrive(0.5, 0, 0);
                 
                 waitFor(0.95);
@@ -66,12 +68,12 @@ public class Robot extends SampleRobot {
                 chassis.stop();
             }
             
-        });
+        };
         
-        tasks.add(new AsyncTask("Clamp and Lift Box") {
+        Task clampliftBox = new AsyncTask("Clamp and Lift Box") {
             
             @Override
-            protected void run() {
+            protected void run(Robot robot) {
             	lift.toggleClamp(true);
             	
             	waitFor(0.6);
@@ -82,26 +84,35 @@ public class Robot extends SampleRobot {
                 
                 lift.setSpeed(0);
             }
-        });
+        };
         
         
-        tasks.add(new Task("Rotate Robot and Move Forward") {
+        Task rotate90Degress = new Task("Rotate 90 Degrees") {
             
             @Override
-            protected void run() {
-            	waitFor(0.5);
-            	
+            protected void run(Robot robot) {
             	chassis.mecanumDrive(0, 0, 0.5);
             	
             	waitFor(1.0);
             	
-            	chassis.mecanumDrive(0.6, 0, 0);
-            	
-            	waitFor(4.0);
-            	
             	chassis.stop();
             }
-        });
+        };
+        
+        Task forwardToAutoZone = new Task("Forward to Auto Zone") {
+
+			@Override
+			protected void run(Robot robot) {
+				chassis.mecanumDrive(0.8, 0, 0);
+				
+				waitFor(3.0);
+				
+				chassis.stop();
+			}
+        	
+        };
+
+        tasks.add(new Rotate(90, 0.8));
 
         
         //=============
@@ -134,7 +145,7 @@ public class Robot extends SampleRobot {
                 break;
             
             dashboard.put("Latest Task", task.getName() + " (#" + (tasks.indexOf(task) + 1) + ")");
-            task.runTask();
+            task.runTask(this);
         }
         
     }
@@ -210,9 +221,9 @@ public class Robot extends SampleRobot {
             //==============
             // Clamp & Lift
             //==============
-            if (gamepad.getFirstPress(13))
+            if (gamepad.getFirstPressX())
             	lift.taskClampLift();
-            else if (gamepad.getFirstPress(14))
+            else if (gamepad.getFirstPressA())
             	lift.taskDownReleaseHome();
             
             //===============

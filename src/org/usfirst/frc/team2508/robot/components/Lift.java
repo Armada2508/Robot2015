@@ -11,7 +11,7 @@ import org.usfirst.frc.team2508.robot.Variables;
 import org.usfirst.frc.team2508.robot.autonomous.AsyncTask;
 
 public class Lift {
-	
+	private Robot robot;
     private Talon talon;
     private Encoder encoder;
     private Solenoid primarySolenoid;
@@ -24,7 +24,7 @@ public class Lift {
         this.primarySolenoid = new Solenoid(0);
         this.secondarySolenoid = new Solenoid(1);
         this.homeInput = new DigitalInput(2);
-
+        this.robot = robot;
         toggleClamp(false);
     }
     
@@ -32,7 +32,7 @@ public class Lift {
     	new AsyncTask("Clamp And Lift") {
 			
 			@Override
-			protected void run() {
+			protected void run(Robot robot) {
 				toggleClamp(true);
 				
 				waitFor(0.2);
@@ -52,14 +52,14 @@ public class Lift {
 				setSpeed(0);
 			}
 			
-		}.runTask();
+		}.runTask(robot);
     }
     
     public void taskDownReleaseHome() {
     	new AsyncTask("Down Release Home") {
 			
 			@Override
-			protected void run() {
+			protected void run(Robot robot) {
 		        encoder.reset();
 		        
 				setSpeed(Variables.LIFT_SPEED + 0.01);
@@ -79,7 +79,7 @@ public class Lift {
 				goHome();
 			}
 			
-		}.runTask();
+		}.runTask(robot);
     }
     
     public boolean isAtHome() {
@@ -133,6 +133,7 @@ public class Lift {
 
     /**
      * Toggle the clamping mechanism.
+     * Example: toggleClamp();
      */
     public void toggleClamp() {
         toggleClamp(!isClamped());
