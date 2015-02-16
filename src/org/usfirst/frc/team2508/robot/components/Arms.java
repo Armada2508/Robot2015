@@ -6,7 +6,7 @@ import org.usfirst.frc.team2508.robot.Variables;
 import edu.wpi.first.wpilibj.Talon;
 
 public class Arms {
-	
+    
     private Talon talon;
 
     private boolean enabled = false;
@@ -21,7 +21,7 @@ public class Arms {
      * @return If arm motors are running.
      */
     public boolean isEnabled() {
-    	return enabled;
+        return enabled;
     }
     
     /**
@@ -29,7 +29,7 @@ public class Arms {
      * @return True if intaking, false if not intaking.
      */
     public boolean isPulling() {
-    	return pulling;
+        return pulling;
     }
 
     /**

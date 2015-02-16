@@ -586,9 +586,9 @@ public class LogitechGamepad extends edu.wpi.first.wpilibj.GenericHID {
         return this.getRightStickX();
     }
 
-	@Override
-	public int getPOV(int pov) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public int getPOV(int pov) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }

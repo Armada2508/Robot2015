@@ -11,13 +11,16 @@ import edu.wpi.first.wpilibj.Timer;
  * can do. It can be executed with runTask().
  */
 public abstract class Task {
-	
-	private String name;
+    
+    private String name;
+    private boolean async;
+    
     private Date stopWaiting;
     private boolean running = false;
     
-    public Task(String name) {
-    	this.name = name;
+    public Task(String name, boolean async) {
+        this.name = name;
+        this.async = async;
     }
     
     /**
@@ -25,36 +28,49 @@ public abstract class Task {
      * @return The name.
      */
     public String getName() {
-    	return name;
+        return name;
     }
 
     /**
      * Initiate and run the task!
      */
     public void runTask(Robot robot) {
-    	System.out.println("Starting Task: \"" + name + "\"");
-    	
-        // Set running
-        this.running = true;
-
-        // Run the task (implemented in child classes).
-        run(robot);
-
-        System.out.println("Finished Task: \"" + name + "\"");
-        this.running = false;
+        Thread thread = getThread(robot);
+        if (async)
+            thread.start();
+        else
+            thread.run();
     }
 
+    public Thread getThread(final Robot robot) {
+        return new Thread() {
+            @Override
+            public void run() {
+                System.out.println("Starting Task: \"" + name + "\"");
+                
+                // Set running
+                running = true;
+
+                // Run the task (implemented in child classes).
+                Task.this.run(robot);
+
+                System.out.println("Finished Task: \"" + name + "\"");
+                running = false;
+            }
+        };
+    }
+    
     /**
      * Locks the thread until an amount of seconds has passed by.
      * @param seconds The amount of time.
      */
     public void waitFor(double seconds) {
-    	this.stopWaiting = new Date(new Date().getTime() + (int) (seconds * 1000.0));
-    	
-    	while (!new Date().after(stopWaiting)) {
-    		// Locks thread!
-    		Timer.delay(0.05);
-    	}
+        this.stopWaiting = new Date(new Date().getTime() + (int) (seconds * 1000.0));
+        
+        while (!new Date().after(stopWaiting)) {
+            // Locks thread!
+            Timer.delay(0.05);
+        }
     }
     
     /**

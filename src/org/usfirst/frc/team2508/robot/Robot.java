@@ -3,7 +3,6 @@ package org.usfirst.frc.team2508.robot;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.usfirst.frc.team2508.robot.autonomous.AsyncTask;
 import org.usfirst.frc.team2508.robot.autonomous.Task;
 import org.usfirst.frc.team2508.robot.components.Arms;
 import org.usfirst.frc.team2508.robot.components.Chassis;
@@ -11,6 +10,9 @@ import org.usfirst.frc.team2508.robot.components.Dashboard;
 import org.usfirst.frc.team2508.robot.components.Lift;
 import org.usfirst.frc.team2508.robot.components.Vision;
 import org.usfirst.frc.team2508.robot.lib.LogitechGamepad;
+import org.usfirst.frc.team2508.robot.tasks.Clamp;
+import org.usfirst.frc.team2508.robot.tasks.LiftBox;
+import org.usfirst.frc.team2508.robot.tasks.Move;
 import org.usfirst.frc.team2508.robot.tasks.Rotate;
 
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
@@ -28,10 +30,10 @@ public class Robot extends SampleRobot {
     public Dashboard dashboard = new Dashboard();
     
     public List<Task> tasks = new ArrayList<Task>();
-
+    
     @Override
     public void robotInit() {
-    	System.out.println("Robot Modular Initialized!");
+        System.out.println("Robot Modular Initialized!");
         resetRobot();
     }
     
@@ -49,70 +51,37 @@ public class Robot extends SampleRobot {
 
     @Override
     public void autonomous() {
-    	System.out.println("Autonomous started!");
+        System.out.println("Autonomous started!");
         chassis.setSafetyEnabled(false);
         resetRobot();
         
-        double Joey = 1.0/0;
         //========================
         // Make the List of Tasks
         //========================
-        Task approachBox = new Task("Approach Box") {
-
-            @Override
-            protected void run(Robot robot) {
-                chassis.mecanumDrive(0.5, 0, 0);
-                
-                waitFor(0.95);
-                
-                chassis.stop();
-            }
-            
-        };
         
-        Task clampliftBox = new AsyncTask("Clamp and Lift Box") {
-            
-            @Override
-            protected void run(Robot robot) {
-            	lift.toggleClamp(true);
-            	
-            	waitFor(0.6);
-            	
-                lift.setSpeed(0.9);
-                
-                waitFor(2.2);
-                
-                lift.setSpeed(0);
-            }
-        };
+        // Approach Box
+        tasks.add(new Move(0.8, 0, 0.6, false));
+       
+        // Clamp Box
+        tasks.add(new Clamp(true, false));
         
+        // Lift Box (async)
+        tasks.add(new LiftBox(0.8, true));
         
-        Task rotate90Degress = new Task("Rotate 90 Degrees") {
-            
-            @Override
-            protected void run(Robot robot) {
-            	chassis.mecanumDrive(0, 0, 0.5);
-            	
-            	waitFor(1.0);
-            	
-            	chassis.stop();
-            }
-        };
+        // Rotate 90 Degrees
+        tasks.add(new Rotate(90, 0.8, false));
         
-        Task forwardToAutoZone = new Task("Forward to Auto Zone") {
-
-			@Override
-			protected void run(Robot robot) {
-				chassis.mecanumDrive(0.8, 0, 0);
-				
-				waitFor(3.0);
-				
-				chassis.stop();
-			}
-        	
-        };
-
-        tasks.add(new Rotate(90, 0.8));
+        // Move to Auto Zone
+        tasks.add(new Move(0.8, 0, 4, false));
+        
+        // Lower Box
+        tasks.add(new LiftBox(-0.8, false));
+        
+        // Unclamp Box
+        tasks.add(new Clamp(false, false));
+        
+        // Leave Box
+        tasks.add(new Move(-0.8, 0, 0.6, false));
 
         
         //=============
@@ -151,7 +120,7 @@ public class Robot extends SampleRobot {
     }
 
     public void operatorControl() {
-    	System.out.println("Operator control started!");
+        System.out.println("Operator control started!");
         chassis.setSafetyEnabled(true);
         resetRobot();
 
@@ -176,7 +145,7 @@ public class Robot extends SampleRobot {
             if (gamepad.getFirstPressRT())
                 chassis.speedFactor += 0.1;
             if (gamepad.getFirstPressLT() || gamepad.getFirstPressRT())
-            	chassis.speedFactor = Math.max(Variables.MIN_SPEED_FACTOR, Math.min(1, chassis.speedFactor));
+                chassis.speedFactor = Math.max(Variables.MIN_SPEED_FACTOR, Math.min(1, chassis.speedFactor));
 
             
             //=================
@@ -187,7 +156,7 @@ public class Robot extends SampleRobot {
             if (gamepad.getFirstPressRightStickPress())
                 chassis.rotationFactor += 0.1;
             if (gamepad.getFirstPressLeftStickPress() || gamepad.getFirstPressRightStickPress())
-            	chassis.rotationFactor = Math.max(Variables.MIN_ROTATION_FACTOR, Math.min(1, chassis.rotationFactor));
+                chassis.rotationFactor = Math.max(Variables.MIN_ROTATION_FACTOR, Math.min(1, chassis.rotationFactor));
             
             
             //======
@@ -222,15 +191,15 @@ public class Robot extends SampleRobot {
             // Clamp & Lift
             //==============
             if (gamepad.getFirstPressX())
-            	lift.taskClampLift();
+                lift.taskClampLift();
             else if (gamepad.getFirstPressA())
-            	lift.taskDownReleaseHome();
+                lift.taskDownReleaseHome();
             
             //===============
             // #yoloDrift420
             //===============
             if (gamepad.getFirstPressStart())
-            	chassis.toggleYoloDrift420();
+                chassis.toggleYoloDrift420();
             
             
             //========
@@ -245,16 +214,19 @@ public class Robot extends SampleRobot {
     }
     
     private double dashTime;
+    private double lastDashUpdate;
 
     public void updateDashboard() {
-    	dashTime += Variables.LOOP_DELAY;
-    	
-    	if (dashTime % 0.2 != 0)
+        dashTime += Variables.LOOP_DELAY;
+        
+        if (dashTime - lastDashUpdate >= 0.2)
             return;
-    	
-    	// Diagnostics
-    	dashboard.put("Diagnostics", chassis.isYoloDrift420ing);
-    	
+        
+        lastDashUpdate = dashTime;
+        
+        // Diagnostics
+        dashboard.put("Diagnostics", chassis.isYoloDrift420ing);
+        
         // Gamepad
         dashboard.put("L-Stick Y (linear)", -gamepad.getLeftStickY());
         dashboard.put("L-Stick X (strafe)", gamepad.getLeftStickX());
@@ -291,7 +263,7 @@ public class Robot extends SampleRobot {
             for (Task task : tasks)
                 if (task.isRunning())
                     concurrent += 1;
-            dashboard.put("Concurrent Tasks", concurrent);	
+            dashboard.put("Concurrent Tasks", concurrent);    
         }
     }
 

@@ -2,11 +2,11 @@ package org.usfirst.frc.team2508.robot.components;
 
 import org.usfirst.frc.team2508.robot.Robot;
 import org.usfirst.frc.team2508.robot.Variables;
-import org.usfirst.frc.team2508.robot.autonomous.AsyncTask;
+import org.usfirst.frc.team2508.robot.autonomous.Task;
 
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Chassis {
 
@@ -28,16 +28,16 @@ public class Chassis {
      * @param motorType
      * @param inverted
      */
-	public void setInvertedMotor(MotorType motorType, boolean inverted) {
-		drive.setInvertedMotor(motorType, inverted);
-	}
+    public void setInvertedMotor(MotorType motorType, boolean inverted) {
+        drive.setInvertedMotor(motorType, inverted);
+    }
     
     /**
      * Set the expiration/timeout of wheels...
      * @param timeout The timeout.
      */
     public void setExpiration(double timeout) {
-    	drive.setExpiration(timeout);
+        drive.setExpiration(timeout);
     }
 
     /**
@@ -66,36 +66,36 @@ public class Chassis {
     }
     
     public void toggleYoloDrift420() {
-    	isYoloDrift420ing = !isYoloDrift420ing;
-    	
-    	if (!isYoloDrift420ing)
-    		return;
-    	
-    	new AsyncTask("Yolo Drift 420") {
+        isYoloDrift420ing = !isYoloDrift420ing;
+        
+        if (!isYoloDrift420ing)
+            return;
+        
+        new Task("Yolo Drift 420", true) {
 
-			@Override
-			protected void run(Robot robot) {
-				robot.lift.goHome();
-				
-				robot.lift.setSpeed(Variables.LIFT_SPEED);
-				
-				double time = 0;
-				
-				while (isYoloDrift420ing) {
-					if (time % 0.3 == 0)
-						robot.lift.toggleClamp();
-					
-					if (time % 3 == 0)
-						robot.lift.setSpeed(-robot.lift.getSpeed());
+            @Override
+            protected void run(Robot robot) {
+                robot.lift.goHome();
+                
+                robot.lift.setSpeed(Variables.LIFT_SPEED);
+                
+                double time = 0;
+                
+                while (isYoloDrift420ing) {
+                    if (time % 0.3 == 0)
+                        robot.lift.toggleClamp();
+                    
+                    if (time % 3 == 0)
+                        robot.lift.setSpeed(-robot.lift.getSpeed());
 
-					mecanumDrive(0.5, 0.5, 0.3);
-					
-					time += Variables.LOOP_DELAY;
-					Timer.delay(Variables.LOOP_DELAY);
-				}
-			}
-    		
-    	}.runTask(robot);
+                    mecanumDrive(0.5, 0.5, 0.3);
+                    
+                    time += Variables.LOOP_DELAY;
+                    Timer.delay(Variables.LOOP_DELAY);
+                }
+            }
+            
+        }.runTask(robot);
     }
     
 }
