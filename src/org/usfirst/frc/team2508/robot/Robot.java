@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.usfirst.frc.team2508.robot.autonomous.Task;
-import org.usfirst.frc.team2508.robot.components.Arms;
 import org.usfirst.frc.team2508.robot.components.Chassis;
 import org.usfirst.frc.team2508.robot.components.Dashboard;
 import org.usfirst.frc.team2508.robot.components.Lift;
@@ -24,7 +23,6 @@ public class Robot extends SampleRobot {
     public LogitechGamepad gamepad = new LogitechGamepad();
 
     public Chassis chassis = new Chassis(this);
-    public Arms arms = new Arms(this);
     public Lift lift = new Lift(this);
     public Vision vision = new Vision(this);
     public Dashboard dashboard = new Dashboard();
@@ -248,10 +246,6 @@ public class Robot extends SampleRobot {
 
         // Clamp
         dashboard.put("Clamp Status", lift.isClamped() ? "Clamped" : "Free");
-        
-        // Arms
-        dashboard.put("Arm Direction", arms.isPulling() ? "Pulling" : "Pushing");
-        dashboard.put("Arm Enabled", arms.isEnabled());
 
         // Camera
         dashboard.put("Camera Enabled?", Variables.VISION);
