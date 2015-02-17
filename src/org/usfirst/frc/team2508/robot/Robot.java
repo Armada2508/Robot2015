@@ -9,10 +9,11 @@ import org.usfirst.frc.team2508.robot.components.Dashboard;
 import org.usfirst.frc.team2508.robot.components.Lift;
 import org.usfirst.frc.team2508.robot.components.Vision;
 import org.usfirst.frc.team2508.robot.lib.LogitechGamepad;
-import org.usfirst.frc.team2508.robot.tasks.Clamp;
-import org.usfirst.frc.team2508.robot.tasks.LiftBox;
-import org.usfirst.frc.team2508.robot.tasks.Move;
-import org.usfirst.frc.team2508.robot.tasks.Rotate;
+import org.usfirst.frc.team2508.robot.tasks.ClampTask;
+import org.usfirst.frc.team2508.robot.tasks.LiftTimeTask;
+import org.usfirst.frc.team2508.robot.tasks.MoveTask;
+import org.usfirst.frc.team2508.robot.tasks.RotateTask;
+import org.usfirst.frc.team2508.robot.tasks.WaitTask;
 
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -40,7 +41,7 @@ public class Robot extends SampleRobot {
         chassis.setInvertedMotor(MotorType.kRearLeft, true);
         chassis.setInvertedMotor(MotorType.kRearRight, false);
         
-        lift.toggleClamp(false);
+        // lift.toggleClamp(false);
         
         tasks = new ArrayList<Task>();
 
@@ -57,30 +58,23 @@ public class Robot extends SampleRobot {
         // Make the List of Tasks
         //========================
         
-        // Approach Box
-        tasks.add(new Move(0.8, 0, 0.6, false));
-       
-        // Clamp Box
-        tasks.add(new Clamp(true, false));
+        int mode = 1;
         
-        // Lift Box (async)
-        tasks.add(new LiftBox(0.8, true));
-        
-        // Rotate 90 Degrees
-        tasks.add(new Rotate(90, 0.8, false));
-        
-        // Move to Auto Zone
-        tasks.add(new Move(0.8, 0, 4, false));
-        
-        // Lower Box
-        tasks.add(new LiftBox(-0.8, false));
-        
-        // Unclamp Box
-        tasks.add(new Clamp(false, false));
-        
-        // Leave Box
-        tasks.add(new Move(-0.8, 0, 0.6, false));
-
+        if (mode == 1) {
+	        tasks.add(new ClampTask(true, false));
+	        
+	        tasks.add(new WaitTask(1.5, false));
+	        
+	        tasks.add(new LiftTimeTask(1.3, false));
+	       
+	        tasks.add(new WaitTask(1.0, false));
+	        
+	        tasks.add(new RotateTask(1.2, true, false));
+	        
+	        tasks.add(new WaitTask(1.0, false));
+	        
+	        tasks.add(new MoveTask(0.7, 0, 2.2, false));
+        }
         
         //=============
         // Async Stuff
@@ -217,10 +211,11 @@ public class Robot extends SampleRobot {
     public void updateDashboard() {
         dashTime += Variables.LOOP_DELAY;
         
-        if (dashTime - lastDashUpdate >= 0.2)
+        if (dashTime - lastDashUpdate >= 0.21)
             return;
         
         lastDashUpdate = dashTime;
+        
         
         // Diagnostics
         dashboard.put("Diagnostics", chassis.isYoloDrift420ing);

@@ -3,18 +3,18 @@ package org.usfirst.frc.team2508.robot.tasks;
 import org.usfirst.frc.team2508.robot.Robot;
 import org.usfirst.frc.team2508.robot.autonomous.Task;
 
-public class Clamp extends Task {
+public class WaitTask extends Task {
 
-    boolean clamp;
+    double time;
     
-    public Clamp(boolean clamp, boolean async) {
-        super(clamp ? "Clamp" : "Unclamp", async);
-        this.clamp = clamp;
+    public WaitTask(double time, boolean async) {
+        super("Wait " + time, async);
+        this.time = time;
     }
 
     @Override
     protected void run(Robot robot) {
-        robot.lift.toggleClamp(clamp);
+    	waitFor(time);
     }
 
 }

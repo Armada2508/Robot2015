@@ -3,7 +3,7 @@ package org.usfirst.frc.team2508.robot.tasks;
 import org.usfirst.frc.team2508.robot.Robot;
 import org.usfirst.frc.team2508.robot.autonomous.Task;
 
-public class Move extends Task {
+public class MoveTask extends Task {
     
     double linear;
     double strafe;
@@ -15,7 +15,7 @@ public class Move extends Task {
      * @param strafe Movement left and right.
      * @param time The amount of time to perform the movement.
      */
-    public Move(double linear, double strafe, double time, boolean async) {
+    public MoveTask(double linear, double strafe, double time, boolean async) {
         super("Move Straight " + linear + ", Strafe " + strafe, async);
         this.linear = linear;
         this.strafe = strafe;
