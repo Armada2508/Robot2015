@@ -41,7 +41,7 @@ public class Robot extends SampleRobot {
         chassis.setInvertedMotor(MotorType.kRearLeft, true);
         chassis.setInvertedMotor(MotorType.kRearRight, false);
         
-        // lift.toggleClamp(false);
+        chassis.setExpiration(1.0);
         
         tasks = new ArrayList<Task>();
 
@@ -58,9 +58,16 @@ public class Robot extends SampleRobot {
         // Make the List of Tasks
         //========================
         
-        int mode = 1;
-        
+        // Mode 1 = Robot.
+        // Mode 2 = Robot, tote.
+        // Mode 3 = Robot, tote and bin.
+        int mode = 3;
+
         if (mode == 1) {
+        	tasks.add(new MoveTask(0.47, 0, 3, false));
+        }
+        
+        if (mode == 2) {
 	        tasks.add(new ClampTask(true, false));
 	        
 	        tasks.add(new WaitTask(1.5, false));
@@ -75,6 +82,25 @@ public class Robot extends SampleRobot {
 	        
 	        tasks.add(new MoveTask(0.7, 0, 2.2, false));
         }
+
+        if (mode == 3) {
+        	tasks.add(new LiftTimeTask(0.9, false));
+        	/*
+        	tasks.add(new WaitTask(1.0, false));
+        	
+        	tasks.add(new MoveTask(0.45, 0, 1.2, false));
+        	
+        	tasks.add(new ClampTask(true, false));
+        	
+        	tasks.add(new WaitTask(1.0, false));
+        	
+        	tasks.add(new RotateTask(1.45, false, false));
+        	
+        	tasks.add(new WaitTask(1.0, false));
+        	
+        	tasks.add(new MoveTask(0.51, 0, 3, false));
+        	*/
+        }
         
         //=============
         // Async Stuff
@@ -84,11 +110,7 @@ public class Robot extends SampleRobot {
             @Override
             public void run() {
                 while (isAutonomous() && isEnabled()) {
-                    //========
-                    // Vision
-                    //========
-                    vision.tick();
-                    
+                	lift.tick(false);
                     updateDashboard();
                     Timer.delay(Variables.LOOP_DELAY);
                 }
@@ -115,6 +137,21 @@ public class Robot extends SampleRobot {
         System.out.println("Operator control started!");
         chassis.setSafetyEnabled(true);
         resetRobot();
+
+        //=============
+        // Async Stuff
+        //=============
+        new Thread() {
+            
+            @Override
+            public void run() {
+                while (isOperatorControl() && isEnabled()) {
+                    updateDashboard();
+                    Timer.delay(0.1);
+                }
+            }
+            
+        }.start();
 
         //=======================
         // Operator Control Loop
@@ -158,8 +195,9 @@ public class Robot extends SampleRobot {
                 lift.setSpeed(-Variables.LIFT_SPEED);
             else if (gamepad.getButtonRB())
                 lift.setSpeed(Variables.LIFT_SPEED);
-            else if (lift.getSpeed() != 0)
-                lift.setSpeed(0);
+            else
+            	lift.setSpeed(0);
+            lift.tick(gamepad.getButtonLB() || gamepad.getButtonRB());
 
 
             //============
@@ -167,56 +205,19 @@ public class Robot extends SampleRobot {
             //============
             if (gamepad.getFirstPressY())
                 lift.toggleClamp();
-
-            
-            /*======
-            // Arms
-            //======
-            if (gamepad.getFirstPressA())
-                arms.reverse();
-
-            if (gamepad.getFirstPressX())
-                arms.toggle();
-            */
-            
-            //==============
-            // Clamp & Lift
-            //==============
-            if (gamepad.getFirstPressX())
-                lift.taskClampLift();
-            else if (gamepad.getFirstPressA())
-                lift.taskDownReleaseHome();
             
             //===============
             // #yoloDrift420
             //===============
-            if (gamepad.getFirstPressStart())
-                chassis.toggleYoloDrift420();
+            // if (gamepad.getFirstPressStart())
+            //     chassis.toggleYoloDrift420();
             
-            
-            //========
-            // Vision
-            //========
-            vision.tick();
-
-            updateDashboard();
             gamepad.updatePrevButtonStates();
             Timer.delay(Variables.LOOP_DELAY);
         }
     }
     
-    private double dashTime;
-    private double lastDashUpdate;
-
     public void updateDashboard() {
-        dashTime += Variables.LOOP_DELAY;
-        
-        if (dashTime - lastDashUpdate >= 0.21)
-            return;
-        
-        lastDashUpdate = dashTime;
-        
-        
         // Diagnostics
         dashboard.put("Diagnostics", chassis.isYoloDrift420ing);
         
@@ -236,8 +237,6 @@ public class Robot extends SampleRobot {
         else if (lift.getSpeed() > 0)
             liftStatus = "Raising";
         dashboard.put("Lift Status", liftStatus);
-        
-        dashboard.put("At Home?", lift.isAtHome());
 
         // Clamp
         dashboard.put("Clamp Status", lift.isClamped() ? "Clamped" : "Free");
@@ -252,8 +251,10 @@ public class Robot extends SampleRobot {
             for (Task task : tasks)
                 if (task.isRunning())
                     concurrent += 1;
-            dashboard.put("Concurrent Tasks", concurrent);    
+            dashboard.put("Concurrent Tasks", concurrent);
         }
+        
+        dashboard.put("Encoder", lift.encoder.getRaw());
     }
 
 }

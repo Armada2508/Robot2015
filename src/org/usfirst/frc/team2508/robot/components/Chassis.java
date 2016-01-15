@@ -75,8 +75,6 @@ public class Chassis {
 
             @Override
             protected void run(Robot robot) {
-                robot.lift.goHome();
-                
                 robot.lift.setSpeed(Variables.LIFT_SPEED);
                 
                 double time = 0;

@@ -11,7 +11,7 @@ public class Variables {
      * The number of rotations needed to reach
      * a height capable of grabbing another box.
      */
-    public static double BOX_HEIGHT_ROTATIONS = 4.0;
+    public static double BOX_HEIGHT_ROTATIONS = 3770.0;
 
     /**
      * The Timer.delay() number to use in 
@@ -54,7 +54,7 @@ public class Variables {
     /**
      * Receive camera input and log to the dashboard?
      */
-    public static boolean VISION = true;
+    public static boolean VISION = false;
 
     /**
      * Set if we should interpret camera input and
